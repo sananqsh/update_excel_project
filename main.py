@@ -4,33 +4,29 @@ from dotenv import load_dotenv
 
 load_dotenv(".env")
 
+def read_excel_data(file_path, key_column):
+        # Use the pandas library to read the Excel file
+        data_frame = pd.read_excel(file_path)
+        # Convert the data frame into a list of dictionaries (each dict = a row)
+        rows_list = data_frame.to_dict('records')
+
+        # Return a dictionary of dictionaries, with key_column as main key
+        return {
+                row[key_column]: {
+                        key: value for key, value in row.items() if key != key_column
+                } for row in rows_list
+        }
+
+def compare_and_add_changes(old_data, new_data, key, compare_key):
+        pass
+
 # Define the file path of the Excel file
-INPUT_FILE_PATH = os.environ.get("INPUT_FILE")
-COMPARE_FILE_PATH = os.environ.get("COMPARE_FILE")
+OLD_FILE_PATH = os.environ.get("OLD_FILE")
+NEW_FILE_PATH = os.environ.get("NEW_FILE")
 
-# KEY_COLUMN = os.environ.get("KEY_COLUMN")
+KEY_COLUMN = os.environ.get("KEY_COLUMN")
+COMP_COLUMN = os.environ.get("COMPARE_COLUMN")
 
-# TEST:
-KEY_COLUMN = 'استاد'
-
-# Use the pandas library to read the Excel file
-input_data_frame = pd.read_excel(INPUT_FILE_PATH)
-# compare_data_frame = pd.read_excel(COMPARE_FILE_PATH)
-
-# Convert the data frame into a list of dictionaries where each dictionary represents a row
-input_rows_list = input_data_frame.to_dict('records')
-# compare_rows_list = compare_data_frame.to_dict('records')
-
-idf_dict = {
-        row[KEY_COLUMN]: {
-                key: value for key, value in row.items() if key != KEY_COLUMN
-        } for row in input_rows_list
-}
-
-# Print the list of rows
-for row in idf_dict:
-        print(row)
-        print(":{\n")
-        print(idf_dict[row])
-        print("\n}\n")
+old_data = read_excel_data(OLD_FILE_PATH, KEY_COLUMN)
+new_data = read_excel_data(NEW_FILE_PATH, KEY_COLUMN)
 
