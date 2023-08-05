@@ -70,8 +70,8 @@ def write_excel_data(updated_data, output_file_path, key_column):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Compare and update employee data.")
-    parser.add_argument("--new", default=OLD_FILE_PATH, help="Name of the old Excel file")
-    parser.add_argument("--old", default=NEW_FILE_PATH, help="Name of the new Excel file")
+    parser.add_argument("--old", default=OLD_FILE_PATH, help="Name of the old Excel file")
+    parser.add_argument("--new", default=NEW_FILE_PATH, help="Name of the new Excel file")
     parser.add_argument("--out", default=OUTPUT_FILE_PATH, help="Name of the output Excel file")
     args = parser.parse_args()
 
@@ -79,8 +79,8 @@ if __name__ == "__main__":
     new_file_path = args.new    
     output_file_path = args.out
     
-    old_data = read_excel_data(OLD_FILE_PATH, KEY_COLUMN)
-    new_data = read_excel_data(NEW_FILE_PATH, KEY_COLUMN)
+    old_data = read_excel_data(old_file_path, KEY_COLUMN)
+    new_data = read_excel_data(new_file_path, KEY_COLUMN)
 
     updated_data = compare_and_add_changes(old_data, new_data.copy(), COMP_COLUMN)
 
