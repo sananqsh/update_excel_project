@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 
 load_dotenv(".env")
 
-OLD_FILE_PATH = os.environ.get("OLD_FILE")
-NEW_FILE_PATH = os.environ.get("NEW_FILE")
+PREV_FILE_PATH = os.environ.get("PREV_FILE")
+CURRENT_FILE_PATH = os.environ.get("CURRENT_FILE")
 OUTPUT_FILE_PATH = os.environ.get("OUTPUT_FILE")
 
 KEY_COLUMN = os.environ.get("KEY_COLUMN")
@@ -31,57 +31,57 @@ def read_excel_data(file_path, key_column):
         } for row in rows_list
     }
 
-def compare_and_add_changes(old_data, new_data, compare_key):
+def compare_and_add_changes(prev_data, cur_data, compare_key):
     """
-        Compares employee data
-        The current version only checks the `level` column for changes
+        Compares row data
+        The current version only checks the `compare_key` column for changes
         But generalization is possible, if requested 
     """
 
-    for id, new_employee in new_data.items():
-        # Compare employee data
-        if id in old_data:
-            old_employee = old_data[id]
-            if old_employee[compare_key] != new_employee[compare_key]:
-                new_employee["changes"] = f"{old_employee.get(compare_key)}->{new_employee.get(compare_key)}"
+    for id, cur_row in cur_data.items():
+        # Compare row data
+        if id in prev_data:
+            prev_row = prev_data[id]
+            if prev_row[compare_key] != cur_row[compare_key]:
+                cur_row["changes"] = f"{prev_row.get(compare_key)}->{cur_row.get(compare_key)}"
             else:
-                new_employee["changes"] = ""
+                cur_row["changes"] = ""
 
         else:
-            new_employee["changes"] = "new joiner"
+            cur_row["changes"] = "new joiner"
 
 
-    # Employees that are not in the new data:
-    left_company_keys = set(old_data.keys()) - set(new_data.keys())
+    # rows that are not in the cur data:
+    left_company_keys = set(prev_data.keys()) - set(cur_data.keys())
     for id in left_company_keys:
-        old_employee = old_data[id]
-        new_employee = old_employee.copy()
-        new_employee["changes"] = "left company"
-        new_data[id] = new_employee
+        prev_row = prev_data[id]
+        cur_row = prev_row.copy()
+        cur_row["changes"] = "left company"
+        cur_data[id] = cur_row
 
-    return new_data
+    return cur_data
 
 
 def write_excel_data(updated_data, output_file_path, key_column):
-    rows_list = [{key_column: id, **employee_data} for id, employee_data in updated_data.items()]
+    rows_list = [{key_column: id, **row_data} for id, row_data in updated_data.items()]
     data_frame = pd.DataFrame(rows_list)
     data_frame.to_excel(output_file_path, index=False)
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Compare and update employee data.")
-    parser.add_argument("--old", default=OLD_FILE_PATH, help="Name of the old Excel file")
-    parser.add_argument("--new", default=NEW_FILE_PATH, help="Name of the new Excel file")
+    parser = argparse.ArgumentParser(description="Compare and update row data.")
+    parser.add_argument("--prev", default=PREV_FILE_PATH, help="Name of the prev Excel file")
+    parser.add_argument("--cur", default=CURRENT_FILE_PATH, help="Name of the current Excel file")
     parser.add_argument("--out", default=OUTPUT_FILE_PATH, help="Name of the output Excel file")
     args = parser.parse_args()
 
-    old_file_path = args.old
-    new_file_path = args.new    
+    prev_file_path = args.prev
+    cur_file_path = args.cur    
     output_file_path = args.out
     
-    old_data = read_excel_data(old_file_path, KEY_COLUMN)
-    new_data = read_excel_data(new_file_path, KEY_COLUMN)
+    prev_data = read_excel_data(prev_file_path, KEY_COLUMN)
+    cur_data = read_excel_data(cur_file_path, KEY_COLUMN)
 
-    updated_data = compare_and_add_changes(old_data, new_data.copy(), COMP_COLUMN)
+    updated_data = compare_and_add_changes(prev_data, cur_data.copy(), COMP_COLUMN)
 
     write_excel_data(updated_data, output_file_path, KEY_COLUMN)
