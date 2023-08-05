@@ -51,11 +51,14 @@ def compare_and_add_changes(old_data, new_data, compare_key):
 
 
     # Employees that are not in the new data:
-    for id, old_employee in old_data.items():
-       if id not in new_data:
-           new_employee = old_employee
-           new_employee["changes"] = "left company"
-           new_data[id] = new_employee
+    left_company_keys = set(old_data.keys()) - set(new_data.keys())
+    for id in left_company_keys:
+        old_employee = old_data[id]
+        new_employee = old_employee.copy()
+        new_employee["changes"] = "left company"
+        new_data[id] = new_employee
+
+    return new_data
 
 
 def write_excel_data(updated_data, output_file_path, key_column):
@@ -68,5 +71,5 @@ if __name__ == "__main__":
     old_data = read_excel_data(OLD_FILE_PATH, KEY_COLUMN)
     new_data = read_excel_data(NEW_FILE_PATH, KEY_COLUMN)
 
-    compare_and_add_changes(old_data, new_data, COMP_COLUMN)
-    write_excel_data(new_data, OUTPUT_FILE_PATH, KEY_COLUMN)
+    updated_data = compare_and_add_changes(old_data, new_data.copy(), COMP_COLUMN)
+    write_excel_data(updated_data, OUTPUT_FILE_PATH, KEY_COLUMN)
