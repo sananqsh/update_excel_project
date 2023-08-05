@@ -42,7 +42,7 @@ def compare_and_add_changes(old_data, new_data, compare_key):
         if id in old_data:
             old_employee = old_data[id]
             if old_employee[compare_key] != new_employee[compare_key]:
-                new_employee["changes"] = f"{old_employee.get(compare_key)}->{old_employee.get(compare_key)}"
+                new_employee["changes"] = f"{old_employee.get(compare_key)}->{new_employee.get(compare_key)}"
             else:
                 new_employee["changes"] = ""
 
