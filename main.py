@@ -10,7 +10,7 @@ CURRENT_FILE_PATH = os.environ.get("CURRENT_FILE")
 OUTPUT_FILE_PATH = os.environ.get("OUTPUT_FILE")
 
 KEY_COLUMN = os.environ.get("KEY_COLUMN")
-COMP_COLUMN = os.environ.get("COMPARE_COLUMN")
+COMP_COLUMNS = os.environ.get("COMPARE_COLUMNS")
 
 
 def read_excel_data(file_path, key_column):
@@ -31,7 +31,7 @@ def read_excel_data(file_path, key_column):
         } for row in rows_list
     }
 
-def compare_and_add_changes(prev_data, cur_data, compare_key):
+def compare_and_add_changes(prev_data, cur_data, compare_keys):
     """
         Compares row data
         The current version only checks the `compare_key` column for changes
@@ -42,10 +42,10 @@ def compare_and_add_changes(prev_data, cur_data, compare_key):
         # Compare row data
         if id in prev_data:
             prev_row = prev_data[id]
-            if prev_row[compare_key] != cur_row[compare_key]:
-                cur_row["changes"] = f"{prev_row.get(compare_key)}->{cur_row.get(compare_key)}"
-            else:
-                cur_row["changes"] = ""
+            cur_row["changes"] = ""
+            for compare_key in compare_keys:
+                if prev_row[compare_key] != cur_row[compare_key]:
+                    cur_row["changes"] += f"{compare_key}: {prev_row.get(compare_key)}->{cur_row.get(compare_key)}"
 
         else:
             cur_row["changes"] = "new joiner"
@@ -82,6 +82,7 @@ if __name__ == "__main__":
     prev_data = read_excel_data(prev_file_path, KEY_COLUMN)
     cur_data = read_excel_data(cur_file_path, KEY_COLUMN)
 
-    updated_data = compare_and_add_changes(prev_data, cur_data.copy(), COMP_COLUMN)
+    compare_columns = COMP_COLUMNS.split(",")
+    updated_data = compare_and_add_changes(prev_data, cur_data.copy(), compare_columns)
 
     write_excel_data(updated_data, output_file_path, KEY_COLUMN)
